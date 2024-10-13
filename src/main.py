@@ -87,6 +87,19 @@ async def on_message(message: discord.Message):
     await bot.process_commands(message)
 
 
+@bot.command(name="serverinfo")
+async def server_info(ctx: commands.Context):
+    """Displays information about the server."""
+    guild = ctx.guild
+    embed = discord.Embed(title=f"Server Information - {guild.name}", color=0x3498DB)
+    embed.add_field(name="Member Count", value=guild.member_count, inline=True)
+    embed.add_field(name="Role Count", value=len(guild.roles), inline=True)
+    embed.add_field(name="Channels", value=len(guild.channels), inline=True)
+    embed.set_thumbnail(url=guild.icon.url)
+
+    await ctx.reply(embed=embed)
+
+
 if __name__ == "__main__":
     if TOKEN:
         print("Starting bot...")
