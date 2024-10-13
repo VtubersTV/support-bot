@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+.venv/
+*.py[cod]
+__pycache__/
+*.so
+*.pyd
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore Python cache files
+__pycache__/
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore environment file
+.env
+
+# Ignore coverage reports
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore virtual environment directories
+env/
+venv/
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore other common files
+*.swp
+*~
