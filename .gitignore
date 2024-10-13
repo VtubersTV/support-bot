@@ -39,3 +39,6 @@ venv/
 # Ignore other common files
 *.swp
 *~
+
+# Ignore database files
+*.sqlite

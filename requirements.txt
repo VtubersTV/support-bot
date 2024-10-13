@@ -4,3 +4,4 @@ requests
 yt-dlp
 pynacl
 beautifulsoup4
+sqlite3
