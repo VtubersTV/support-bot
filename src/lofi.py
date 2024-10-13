@@ -83,9 +83,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
 class LofiMusicPlayer:
     def __init__(self, bot):
         self.bot = bot
+        self.reaction_threshold = 5
 
     async def play_random_local(self, voice_client, cursor, channel, retryCount=0):
-        """Plays a random Lofi music track from the database in the voice channel."""
         cursor.execute("SELECT filename, title, video_id, thumbnail FROM LofiMusic ORDER BY RANDOM() LIMIT 1")
         rows = cursor.fetchall()
 
@@ -94,11 +94,10 @@ class LofiMusicPlayer:
                 print("No music found in the database.")
             else:
                 print(f"No music found in the database. Retry count: {retryCount}")
-            # Keep trying to play music every 10 seconds
             await asyncio.sleep(10)
             await self.play_random_local(voice_client, cursor, channel, retryCount + 1)
             return
-        
+
         row = rows[0]
         filename = row[0]
         title = row[1]
@@ -117,19 +116,43 @@ class LofiMusicPlayer:
             return
 
         # Play the music
-        player = discord.FFmpegPCMAudio(file_path, **ffmpeg_options)     
+        player = discord.FFmpegPCMAudio(file_path, **ffmpeg_options)
         voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+
         embed = discord.Embed(title=f"Now playing: {title} :musical_note:", color=0x3498DB)
         embed.url = f"https://www.youtube.com/watch?v={video_id}"
         embed.set_image(url=thumbnail)
+        embed.description=f"To skip this song, react with the '👎'. It must have {self.reaction_threshold} reactions"
         embed.set_footer(text="View the source code: https://github.com/VtubersTV/support-bot/blob/master/src/lofi.py")
-        await channel.send(embed=embed)
+        message = await channel.send(embed=embed)
+        
+        # React to the message
+        await message.add_reaction('👍')
+        await message.add_reaction('👎')
+
+        thumbs_down_count = 0
+
+        def check(reaction, user):
+            return user != self.bot.user and str(reaction.emoji) in ['👍', '👎'] and reaction.message.id == message.id
 
         while voice_client.is_playing():
-            await asyncio.sleep(1)
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
+
+                if str(reaction.emoji) == '👎':
+                    thumbs_down_count += 1
+                    if thumbs_down_count >= self.reaction_threshold:
+                        print("Song skipped due to too many thumbs down.")
+                        voice_client.stop()
+                        break
+            except asyncio.TimeoutError:
+                continue  # Just ignore timeout and keep playing
+
+        # If song finished playing naturally, check if we need to skip
+        if thumbs_down_count >= self.reaction_threshold:
+            await self.play_random_local(voice_client, cursor, channel)
 
     async def connect(self, cursor):
-        """Connects to a specified voice channel and starts playing random Lofi music."""
         channel_id = 1294909246860955691
         channel = self.bot.get_channel(channel_id)
         if channel is None or not isinstance(channel, discord.VoiceChannel):
