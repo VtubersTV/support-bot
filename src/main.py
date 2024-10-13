@@ -79,14 +79,6 @@ async def ping(ctx: commands.Context):
     await msg.edit(content=None, embed=embed)
 
 
-@bot.event
-async def on_message(message: discord.Message):
-    """Handles new messages and manages slowmode based on predicted activity."""
-    if message.author.bot:
-        return
-    await bot.process_commands(message)
-
-
 @bot.command(name="serverinfo")
 async def server_info(ctx: commands.Context):
     """Displays information about the server."""
@@ -98,6 +90,14 @@ async def server_info(ctx: commands.Context):
     embed.set_thumbnail(url=guild.icon.url)
 
     await ctx.reply(embed=embed)
+
+
+@bot.event
+async def on_message(message: discord.Message):
+    """Handles new messages and manages slowmode based on predicted activity."""
+    if message.author.bot:
+        return
+    await bot.process_commands(message)
 
 
 if __name__ == "__main__":
