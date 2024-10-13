@@ -1,3 +1,6 @@
 discord
 python-dotenv
 requests
+yt-dlp
+pynacl
+beautifulsoup4

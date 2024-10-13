@@ -3,8 +3,9 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import asyncio
-from utils import is_staff
+from utils import is_staff, check_for_ffmpeg
 import requests
+from lofi import LofiMusicPlayer
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -21,6 +22,8 @@ activity = discord.Activity(
 )
 bot = commands.Bot(command_prefix="!", intents=intents, activity=activity)
 
+lofi_music_player = LofiMusicPlayer(bot)
+
 SITE_URLS = {
     "frontend": "https://vtubers.tv",
     "api": "https://api.vtubers.tv/health",
@@ -33,6 +36,7 @@ async def on_ready():
     """Event triggered when the bot is ready."""
     print(f"Logged in as {bot.user} ({bot.user.id})")
     print("------")
+    await lofi_music_player.connect()
 
 
 @bot.event
@@ -102,6 +106,7 @@ async def on_message(message: discord.Message):
 
 if __name__ == "__main__":
     if TOKEN:
+        check_for_ffmpeg()
         print("Starting bot...")
         bot.run(TOKEN)
     else:
