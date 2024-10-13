@@ -3,6 +3,7 @@ import random
 import yt_dlp as youtube_dl
 import discord
 import asyncio
+import shutil
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -68,7 +69,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if not os.path.exists(filename):
             original_filename = ytdl.prepare_filename(data)
             if os.path.exists(original_filename):
-                os.rename(original_filename, filename)
+                shutil.copy(original_filename, filename)
+                os.remove(original_filename)
                 print(f'Downloaded: {filename}')
             else:
                 print('Download failed.')
